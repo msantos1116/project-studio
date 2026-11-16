@@ -371,7 +371,7 @@ async function cloudFetch(){if(!cloudClient||!cloudUser)throw Error('Sign in fir
 window.addEventListener('focus',()=>{if(cloudReady)cloudSyncNow()});
 window.addEventListener('offline',()=>{if(cloudUser)cloudStatus('Offline — changes saved on this device; export JSON backup if needed.')});
 window.addEventListener('online',()=>{if(cloudReady){if(cloudDirty||cloudPending())cloudSchedule(250);else cloudSyncNow()}else if(cloudUser)cloudAutoLoad()});
-render();
+// Initial render is deferred until media/book navigation is installed.
 
 // V7.6: cloud-backed media and book spreads. Media binary data is never embedded in project JSON.
 const MEDIA_BUCKET='studio-media';
@@ -427,5 +427,13 @@ renderNav=function(){studioNavOriginal();if(!cloudUser||!current)return;let nav=
 render=function(){if(view==='media'||view==='book'){if(current&&!project()){current=null;view='home'}if(!cloudUser||!project()){view='home';studioRenderOriginal();return}renderNav();$('app').innerHTML=view==='media'?mediaPage(project()):bookPage(project());return}studioRenderOriginal()};
 // Avoid saving empty book spreads until the user actually edits a spread.
 
-cloudInitialize();
+try { render(); } catch (error) {
+ console.error('Project Studio startup render failed:', error);
+ document.getElementById('app').innerHTML = '<div class="panel"><h2>Project Studio could not start</h2><p class="note" id="startupError"></p><button class="btn" onclick="location.reload()">Retry</button></div>';
+ document.getElementById('startupError').textContent = error.message || String(error);
+}
+cloudInitialize().catch(error => {
+ console.error('Project Studio cloud initialization failed:',error);
+ const el=document.getElementById('cloudState');if(el)el.textContent='Cloud connection error: '+error.message;
+});
 </script></body></html>
