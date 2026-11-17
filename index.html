@@ -59,7 +59,7 @@ function newScene(){flushEditor();let s={id:uid(),title:'Untitled scene',summary
 function changeSceneTab(tab){flushEditor();sceneTab=tab;render()}function saveScene(id,redraw=true){let p=project(),s=p.scenes.find(x=>x.id===id);if(!s)return;s.title=$('sceneTitle')?.value||s.title;s.summary=$('sceneSummary')?.value||'';let key=sceneTab==='story'?'story':sceneTab==='direction'?'direction':'script';if(sceneTab==='music')s.songIds=[...document.querySelectorAll('.songLink:checked')].map(x=>x.value);else s[key]=$('sceneBody')?.value||'';let secId=$('sceneSection')?.value||'';p.sections.forEach(x=>x.sceneIds=x.sceneIds.filter(i=>i!==id));if(secId)p.sections.find(x=>x.id===secId)?.sceneIds.push(id);save();if(redraw){render();toast('Scene saved')}}function deleteScene(id){if(!confirm('Delete this scene?'))return;let p=project();p.scenes=p.scenes.filter(s=>s.id!==id);p.sections.forEach(s=>s.sceneIds=s.sceneIds.filter(x=>x!==id));activeScene=null;persist()}
 function writingPage(p){return `<div class="top"><div><div class="eyebrow">Long-form writing</div><h1 class="title">Writing</h1><p class="sub">A freeform writing space, alongside passages saved in individual scenes.</p></div>${b('Save writing','saveWriting()','primary')}</div><div class="panel">${field('writingBody','Project manuscript / screenplay',p.writing||'','textarea')}<p class="note">Scene-specific writing stays in the scene editor. This is an additional project-wide document.</p></div><div class="panel"><h3>Scene passages</h3>${p.scenes.filter(s=>s.script?.trim()).map(s=>`<div class="section"><strong>${esc(s.title)}</strong><p style="white-space:pre-wrap">${esc(s.script)}</p></div>`).join('')||'<p class="note">No scene passages yet.</p>'}</div>`}function saveWriting(){project().writing=$('writingBody').value;save();toast('Writing saved')}
 function songsPage(p){return `<div class="top"><div><div class="eyebrow">Music and inspiration</div><h1 class="title">Music</h1><p class="sub">Build a soundtrack or simply collect the songs that spark ideas.</p></div>${b('+ Add song','newSong()','primary')}</div><div class="two"><div class="panel"><div class="stack">${p.songs.map(s=>`<div class="item ${activeSong===s.id?'selected':''}" onclick="editSong('${s.id}')"><h3>♫ ${esc(s.title)}</h3><div class="small">${esc(s.artist)}</div></div>`).join('')||blank('No songs yet','Add a song to your project.')}</div></div><div class="panel">${activeSong?songEditor(p):blank('Song notes','Select a song to capture its imagery, emotion, or story ideas.')}</div></div>`}function newSong(){let s={id:uid(),title:'Untitled song',artist:'',url:'',notes:''};project().songs.push(s);activeSong=s.id;persist()}function editSong(id){flushEditor();activeSong=id;render()}function songEditor(p){let s=p.songs.find(x=>x.id===activeSong);return `<h2>Song details</h2>${field('songTitle','Title',s.title)}${field('songArtist','Artist',s.artist)}${field('songUrl','Spotify / reference URL',s.url)}${field('songNotes','Images, emotions, interpretations',s.notes,'textarea')}<div class="row">${b('Save song',`saveSong('${s.id}')`,'primary')}${b('Delete',`deleteSong('${s.id}')`,'danger')}</div>`}function saveSong(id){let s=project().songs.find(x=>x.id===id);s.title=$('songTitle').value;s.artist=$('songArtist').value;s.url=$('songUrl').value;s.notes=$('songNotes').value;persist();toast('Song saved')}function deleteSong(id){if(!confirm('Delete song?'))return;let p=project();p.songs=p.songs.filter(x=>x.id!==id);p.scenes.forEach(s=>s.songIds=s.songIds.filter(x=>x!==id));activeSong=null;persist()}
-function charactersPage(p){return `<div class="top"><div><div class="eyebrow">People and perspectives</div><h1 class="title">Characters</h1><p class="sub">Develop characters, motivations, contradictions, and arcs.</p></div>${b('+ Add character','newCharacter()','primary')}</div><div class="two"><div class="panel"><div class="stack">${p.characters.map(c=>`<div class="item ${activeCharacter===c.id?'selected':''}" onclick="flushEditor();activeCharacter='${c.id}';render()"><h3>${esc(c.name)}</h3><div class="small">${esc(c.role)}</div></div>`).join('')||blank('No characters yet','Start with a name or an idea.')}</div></div><div class="panel">${activeCharacter?characterEditor(p):blank('Character profile','Select a character to edit.')}</div></div>`}function newCharacter(){let c={id:uid(),name:'Unnamed character',role:'',notes:''};project().characters.push(c);activeCharacter=c.id;persist()}function characterEditor(p){let c=p.characters.find(x=>x.id===activeCharacter);return `<h2>Character profile</h2>${field('charName','Name',c.name)}${field('charRole','Role / relationship',c.role)}${field('charNotes','Background, motivation, arc',c.notes,'textarea')}<div class="row">${b('Save',`saveCharacter('${c.id}')`,'primary')}${b('Delete',`deleteCharacter('${c.id}')`,'danger')}</div>`}function saveCharacter(id){let c=project().characters.find(x=>x.id===id);c.name=$('charName').value;c.role=$('charRole').value;c.notes=$('charNotes').value;persist()}function deleteCharacter(id){if(!confirm('Delete character?'))return;project().characters=project().characters.filter(x=>x.id!==id);activeCharacter=null;persist()}
+function charactersPage(p){return `<div class="top"><div><div class="eyebrow">People and perspectives</div><h1 class="title">Characters</h1><p class="sub">Develop characters, motivations, contradictions, and arcs.</p></div>${b('+ Add character','newCharacter()','primary')}</div><div class="two"><div class="panel"><div class="stack">${p.characters.map(c=>`<div class="item ${activeCharacter===c.id?'selected':''}" onclick="flushEditor();activeCharacter='${c.id}';render()"><h3>${esc(c.name)}</h3><div class="small">${esc(c.role)}</div></div>`).join('')||blank('No characters yet','Start with a name or an idea.')}</div></div><div class="panel">${activeCharacter?characterEditor(p):blank('Character profile','Select a character to edit.')}</div></div>`}function newCharacter(){flushEditor();let c={id:uid(),name:'',role:'',notes:''};project().characters.push(c);activeCharacter=c.id;save();render()}function copyCharacter(id){flushEditor();let original=project().characters.find(c=>c.id===id);if(!original)return;let copy={...structuredClone(original),id:uid(),name:(original.name||'Unnamed character')+' (copy)'};project().characters.push(copy);activeCharacter=copy.id;save();render();toast('Character copied — edit the new profile independently')}function characterEditor(p){let c=p.characters.find(x=>x.id===activeCharacter);return `<h2>Character profile</h2>${field('charName','Name',c.name)}${field('charRole','Role / relationship',c.role)}${field('charNotes','Background, motivation, arc',c.notes,'textarea')}<div class="row">${b('Save',`saveCharacter('${c.id}')`,'primary')}${b('Copy character',`copyCharacter('${c.id}')`)}${b('Delete',`deleteCharacter('${c.id}')`,'danger')}</div>`}function saveCharacter(id){let c=project().characters.find(x=>x.id===id);c.name=$('charName').value;c.role=$('charRole').value;c.notes=$('charNotes').value;persist()}function deleteCharacter(id){if(!confirm('Delete character?'))return;project().characters=project().characters.filter(x=>x.id!==id);activeCharacter=null;persist()}
 function notebookPage(p){return `<div class="top"><div><div class="eyebrow">Creative fragments</div><h1 class="title">Notebook</h1><p class="sub">A home for ideas that aren't ready to become scenes.</p></div>${b('+ New note','newNote()','primary')}</div><div class="two"><div class="panel"><div class="stack">${p.notes.map(n=>`<div class="item ${activeNote===n.id?'selected':''}" onclick="flushEditor();activeNote='${n.id}';render()"><h3>${esc(n.title)}</h3><div class="small">${esc(n.body.slice(0,100))}</div></div>`).join('')||blank('No notes yet','Capture an idea, however unfinished.')}</div></div><div class="panel">${activeNote?noteEditor(p):blank('Notebook','Select or create a note.')}</div></div>`}function newNote(){let n={id:uid(),title:'Untitled note',body:''};project().notes.push(n);activeNote=n.id;persist()}function noteEditor(p){let n=p.notes.find(x=>x.id===activeNote);return `<h2>Notebook entry</h2>${field('noteTitle','Title',n.title)}${field('noteBody','Note',n.body,'textarea')}<div class="row">${b('Save',`saveNote('${n.id}')`,'primary')}${b('Delete',`deleteNote('${n.id}')`,'danger')}</div>`}function saveNote(id){let n=project().notes.find(x=>x.id===id);n.title=$('noteTitle').value;n.body=$('noteBody').value;persist()}function deleteNote(id){if(!confirm('Delete note?'))return;project().notes=project().notes.filter(x=>x.id!==id);activeNote=null;persist()}
 const IDEA_TYPES=['Thought','Scene seed','Dialogue','Visual','Music','Character','Research'];const IDEA_COLORS=['#334e78','#5b3a76','#275b62','#684a37','#4d6250','#6a3657'];
 function ideasPage(p){p.ideas??=[];let cards=p.ideas.filter(x=>(ideaFilter==='All'||x.type===ideaFilter)&&(!ideaQuery||[x.title,x.body,x.type].join(' ').toLowerCase().includes(ideaQuery.toLowerCase())));return `<div class="top"><div><div class="eyebrow">Creative playground / No structure required</div><h1 class="title">Idea Board <span class="tagline">✦</span></h1><p class="sub">Collect fragments. Move them around. Turn an idea into a scene when it feels ready.</p></div>${b('+ Capture idea','newIdea()','primary')}</div><div class="idea-toolbar"><input class="idea-search" aria-label="Search ideas" placeholder="Search your ideas…" value="${esc(ideaQuery)}" oninput="ideaQuery=this.value;refreshIdeas()"><select class="idea-search" aria-label="Filter idea type" onchange="ideaFilter=this.value;refreshIdeas()"><option>All</option>${IDEA_TYPES.map(t=>`<option ${ideaFilter===t?'selected':''}>${t}</option>`).join('')}</select>${b('Reset filters','resetIdeaFilters()','ghost')}<span class="chip">${cards.length} / ${p.ideas.length} ideas</span></div><div class="idea-board" id="ideaBoard">${cards.map(x=>`<article class="idea-card" draggable="true" data-id="${x.id}" style="--idea-color:${IDEA_COLORS.includes(x.color)?x.color:IDEA_COLORS[0]}" ondragstart="ideaDragStart(event,'${x.id}')" ondragover="ideaDragOver(event,'${x.id}')" ondragleave="this.classList.remove('over')" ondrop="ideaDrop(event,'${x.id}')" ondragend="ideaDragEnd()"><div class="row"><span class="idea-type">${esc(x.type)}</span><button onclick="editIdea('${x.id}')" title="Edit idea">✎ Edit</button></div><h3>${esc(x.title||'Untitled idea')}</h3><p>${esc((x.body||'').slice(0,300))}${(x.body||'').length>300?'…':''}</p><div class="idea-bottom"><span class="idea-preview">${x.sceneId?'Linked to scene':'Unassigned idea'}</span><button onclick="makeSceneFromIdea('${x.id}')" title="Create a new scene from this idea">↗ Scene</button></div></article>`).join('')}<div class="idea-drop" ondragover="event.preventDefault()" ondrop="ideaDrop(event,null)" onclick="newIdea()">＋ Add another idea</div></div><p class="note">Drag cards to change their order. Your ideas are saved automatically on this device. Creating a scene keeps the original idea.</p>`}
@@ -546,7 +546,7 @@ spotifyToken=spotifyReadToken();
 function spotifyConnected(){return !!spotifyToken?.access_token&&spotifyToken.expires>Date.now()}
 function spotifyRandom(n){let bytes=new Uint8Array(n);crypto.getRandomValues(bytes);return Array.from(bytes,b=>String.fromCharCode(b)).join('')}
 function spotifyBase64Url(bytes){return btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
-async function spotifyConnect(){if(location.protocol!=='https:')return toast('Open Imagine on HTTPS to connect Spotify');let verifier=spotifyBase64Url(new TextEncoder().encode(spotifyRandom(48)));let digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier));let state=spotifyBase64Url(new TextEncoder().encode(spotifyRandom(20)));sessionStorage.setItem('imagine-spotify-pkce',JSON.stringify({verifier,state,created:Date.now()}));let q=new URLSearchParams({response_type:'code',client_id:spotifyClientId(),scope:'user-read-private playlist-read-private playlist-read-collaborative',redirect_uri:location.origin+location.pathname,code_challenge_method:'S256',code_challenge:spotifyBase64Url(digest),state});location.href='https://accounts.spotify.com/authorize?'+q}
+async function spotifyConnect(){if(location.protocol!=='https:')return toast('Open Imagine on HTTPS to connect Spotify');let verifier=spotifyBase64Url(new TextEncoder().encode(spotifyRandom(48)));let digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier));let state=spotifyBase64Url(new TextEncoder().encode(spotifyRandom(20)));sessionStorage.setItem('imagine-spotify-pkce',JSON.stringify({verifier,state,created:Date.now()}));let q=new URLSearchParams({response_type:'code',client_id:spotifyClientId(),scope:'user-read-private playlist-read-private playlist-read-collaborative streaming user-read-playback-state user-modify-playback-state',redirect_uri:location.origin+location.pathname,code_challenge_method:'S256',code_challenge:spotifyBase64Url(digest),state});location.href='https://accounts.spotify.com/authorize?'+q}
 async function spotifyHandleRedirect(){let q=new URLSearchParams(location.search);if(!q.has('code')&&!q.has('error'))return;let pkce;try{pkce=JSON.parse(sessionStorage.getItem('imagine-spotify-pkce')||'null')}catch{};history.replaceState({},'',location.pathname+location.hash);if(q.has('error'))return toast('Spotify authorization: '+q.get('error'));if(!pkce||pkce.state!==q.get('state')||Date.now()-pkce.created>10*60*1000)return toast('Spotify authorization expired. Try connecting again.');sessionStorage.removeItem('imagine-spotify-pkce');try{let body=new URLSearchParams({client_id:spotifyClientId(),grant_type:'authorization_code',code:q.get('code'),redirect_uri:location.origin+location.pathname,code_verifier:pkce.verifier});let r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});let t=await r.json();if(!r.ok)throw Error(t.error_description||t.error||'Token exchange failed');spotifyToken={access_token:t.access_token,expires:Date.now()+t.expires_in*1000};sessionStorage.setItem(SPOTIFY_TOKEN_KEY,JSON.stringify(spotifyToken));toast('Spotify connected');render()}catch(e){toast('Spotify connection failed: '+e.message)}}
 function spotifyDisconnect(){spotifyToken=null;spotifyProfile=null;sessionStorage.removeItem(SPOTIFY_TOKEN_KEY);render()}
 async function spotifyFetch(path){if(!spotifyConnected())throw Error('Connect Spotify again');let r=await fetch('https://api.spotify.com/v1/'+path,{headers:{Authorization:'Bearer '+spotifyToken.access_token}});if(r.status===401){spotifyDisconnect();throw Error('Spotify session expired. Reconnect.')}if(!r.ok){let detail='';try{let body=await r.json();detail=body?.error?.message||body?.error_description||''}catch(_){}throw Error('Spotify API error '+r.status+(detail?': '+detail:''))}return r.json()}
@@ -556,6 +556,140 @@ const originalSongsPage=songsPage;
 songsPage=function(p){let base=originalSongsPage(p);const service=`<div class="panel"><div class="service-panel"><div class="row"><div class="spotify-mark">≋</div><div><strong>Spotify</strong><div class="small">${spotifyConnected()?'Connected for this session':'Find and import music from Spotify'}</div></div></div><div class="actions">${spotifyConnected()?b('Disconnect','spotifyDisconnect()'):b('Connect Spotify','spotifyConnect()','primary')}</div></div>${spotifyConnected()?`<div class="field" style="margin-top:16px"><label>Search Spotify</label><div class="row" style="flex-wrap:nowrap"><input id="spotifyQuery" placeholder="Song, artist, album…" onkeydown="if(event.key==='Enter')spotifySearch()">${b('Search','spotifySearch()','primary')}</div></div><div id="spotifySearchStatus" class="small"></div><div id="spotifyResults"></div>`:''}</div>`;return base.replace('<div class="two">',service+'<div class="two">')};
 const originalRenderV77=render;
 render=function(){originalRenderV77();if(view==='ideas'&&project()){document.querySelectorAll('#ideaBoard .media-attachbar,#ideaBoard .media-links').forEach(el=>el.remove())}if(view==='ideas'||view==='media')hydrateMediaImages($('app'));document.querySelectorAll('.app-version').forEach(el=>el.textContent='Imagine · '+IMAGINE_VERSION)};
+
+// V7.8.5 — Spotify Web Playback SDK mini-player.
+// Spotify Premium required; playback is not available to every Spotify account.
+let imaginePlayer=null,imagineDevice=null,imaginePlayerState=null,imaginePlayerError='',imaginePlayingSong=null;
+let imaginePlayerReady=false,imagineSdkPromise=null,imaginePositionTimer=null;
+const imaginePlayerCss=document.createElement('style');
+imaginePlayerCss.textContent=`
+body.imagine-has-player{padding-bottom:105px}
+#imagineMiniPlayer{position:fixed;bottom:0;left:0;right:0;z-index:200;background:#12192b;border-top:1px solid #3a4461;color:#f5f6ff;box-shadow:0 -10px 35px #0005;padding:11px 18px;font-family:inherit}
+.imagine-player-inner{max-width:1450px;margin:auto;display:flex;align-items:center;gap:14px}
+.imagine-player-info{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.imagine-player-cover{height:48px;width:48px;border-radius:7px;object-fit:cover;background:#29324a}
+.imagine-player-title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.imagine-player-artist{font-size:12px;color:#abb5d1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.imagine-player-controls{display:flex;align-items:center;justify-content:center;gap:8px}
+.imagine-player-controls button{border:0;background:transparent;color:#fff;font-size:19px;cursor:pointer;padding:7px;border-radius:9px}
+.imagine-player-controls button:hover{background:#29344d}
+.imagine-player-controls .main-play{background:#1ed760;color:#08150c;border-radius:50%;width:39px;height:39px;font-size:20px}
+.imagine-player-progress{display:flex;align-items:center;gap:8px;flex:1;max-width:350px;font-size:11px;color:#abb5d1}
+.imagine-player-progress input{width:100%;accent-color:#1ed760}
+.imagine-player-status{font-size:11px;color:#b5c0d8;max-width:200px}
+.imagine-play-btn{margin-left:8px;cursor:pointer}
+@media(max-width:750px){#imagineMiniPlayer{padding:9px}.imagine-player-inner{flex-wrap:wrap;gap:6px}.imagine-player-info{flex:1 1 55%}.imagine-player-progress{order:3;flex:1 1 100%;max-width:none}.imagine-player-status{display:none}body.imagine-has-player{padding-bottom:145px}}
+`;
+document.head.appendChild(imaginePlayerCss);
+function imagineFormatTime(ms){if(!Number.isFinite(ms))return '0:00';let sec=Math.floor(Math.max(0,ms)/1000);return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')}
+function imagineSongId(song){return song?.spotifyId||song?.url?.match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/)?.[1]||null}
+function imagineLoadSdk(){
+ if(window.Spotify?.Player)return Promise.resolve();
+ if(imagineSdkPromise)return imagineSdkPromise;
+ imagineSdkPromise=new Promise((resolve,reject)=>{
+  const prior=window.onSpotifyWebPlaybackSDKReady;
+  window.onSpotifyWebPlaybackSDKReady=()=>{if(typeof prior==='function')prior();resolve()};
+  const tag=document.createElement('script');tag.src='https://sdk.scdn.co/spotify-player.js';
+  tag.onerror=()=>reject(Error('Could not load Spotify player SDK'));document.head.appendChild(tag);
+ });
+ return imagineSdkPromise;
+}
+async function imagineEnsurePlayer(){
+ if(!spotifyConnected())throw Error('Connect Spotify to use playback');
+ if(imaginePlayerReady&&imagineDevice)return imagineDevice;
+ await imagineLoadSdk();
+ if(!imaginePlayer){
+  imaginePlayer=new Spotify.Player({name:'Imagine Music Player',getOAuthToken:cb=>cb(spotifyToken?.access_token||''),volume:.65});
+  imaginePlayer.addListener('ready',({device_id})=>{imagineDevice=device_id;imaginePlayerReady=true;imaginePlayerError='';imagineUpdatePlayer()});
+  imaginePlayer.addListener('not_ready',()=>{imaginePlayerReady=false;imagineDevice=null;imagineUpdatePlayer()});
+  imaginePlayer.addListener('player_state_changed',state=>{imaginePlayerState=state;imagineUpdatePlayer()});
+  for(const name of ['initialization_error','authentication_error','account_error','playback_error']){
+   imaginePlayer.addListener(name,({message})=>{imaginePlayerError=message||name;imagineUpdatePlayer();toast('Spotify player: '+imaginePlayerError)});
+  }
+  imaginePlayer.addListener('autoplay_failed',()=>{imaginePlayerError='Press Play to allow browser audio';imagineUpdatePlayer()});
+  const ok=await imaginePlayer.connect();
+  if(!ok)throw Error('Spotify playback device could not connect');
+ }
+ for(let i=0;i<35&&!imagineDevice;i++)await new Promise(r=>setTimeout(r,100));
+ if(!imagineDevice)throw Error(imaginePlayerError||'Spotify playback device is not ready');
+ return imagineDevice;
+}
+async function imaginePlayerApi(path,method='PUT',body){
+ const r=await fetch('https://api.spotify.com/v1/me/player/'+path,{
+  method,headers:{Authorization:'Bearer '+spotifyToken.access_token,...(body?{'Content-Type':'application/json'}:{})},
+  ...(body?{body:JSON.stringify(body)}:{})
+ });
+ if(!r.ok){let d='';try{let x=await r.json();d=x?.error?.message||''}catch{}throw Error('Spotify playback '+r.status+(d?': '+d:''))}
+}
+async function imaginePlaySong(id){
+ try{
+  const p=project(),song=p?.songs?.find(s=>s.id===id);
+  if(!song)throw Error('Song not found');
+  const track=imagineSongId(song);
+  if(!track)throw Error('This song needs a Spotify track link to play');
+  imaginePlayingSong=song;imagineUpdatePlayer();
+  // A user gesture activates audio on mobile Safari and other restricted browsers.
+  if(imaginePlayer)imaginePlayer.activateElement();
+  const device=await imagineEnsurePlayer();
+  await imaginePlayer.activateElement();
+  await imaginePlayerApi('play?device_id='+encodeURIComponent(device),'PUT',{uris:['spotify:track:'+track]});
+  imaginePlayerError='';imagineUpdatePlayer();
+ }catch(e){imaginePlayerError=e.message;imagineUpdatePlayer();toast(e.message)}
+}
+async function imaginePlayerAction(action){
+ try{
+  if(!imaginePlayerReady)await imagineEnsurePlayer();
+  await imaginePlayer.activateElement();
+  if(action==='toggle'){
+   if(!imaginePlayerState&&imaginePlayingSong)return imaginePlaySong(imaginePlayingSong.id);
+   await imaginePlayer.togglePlay();
+  }else if(action==='stop'){await imaginePlayer.pause();await imaginePlayer.seek(0)}
+  else if(action==='next')await imaginePlayer.nextTrack();
+  else if(action==='previous')await imaginePlayer.previousTrack();
+  imaginePlayerError='';imagineUpdatePlayer();
+ }catch(e){imaginePlayerError=e.message;imagineUpdatePlayer();toast(e.message)}
+}
+async function imagineSeek(value){
+ try{await imaginePlayer.seek(Number(value));imagineUpdatePlayer()}catch(e){toast(e.message)}
+}
+function imagineUpdatePlayer(){
+ let el=document.getElementById('imagineMiniPlayer');
+ if(!spotifyConnected()){el?.remove();document.body.classList.remove('imagine-has-player');return}
+ if(!el){el=document.createElement('div');el.id='imagineMiniPlayer';document.body.appendChild(el)}
+ document.body.classList.add('imagine-has-player');
+ const state=imaginePlayerState,track=state?.track_window?.current_track;
+ const song=imaginePlayingSong;
+ const title=track?.name||song?.title||'Ready to play';
+ const artist=track?.artists?.map(x=>x.name).join(', ')||song?.artist||'Select a song in Imagine';
+ const cover=track?.album?.images?.[0]?.url||song?.artwork||'';
+ const duration=state?.duration||track?.duration_ms||0,position=state?.position||0;
+ el.innerHTML=`<div class="imagine-player-inner">
+  <div class="imagine-player-info">${cover?`<img class="imagine-player-cover" src="${esc(cover)}" alt="Album art">`:'<div class="imagine-player-cover"></div>'}
+  <div style="min-width:0"><div class="imagine-player-title">${esc(title)}</div><div class="imagine-player-artist">${esc(artist)}</div></div></div>
+  <div class="imagine-player-controls">
+   <button aria-label="Previous" title="Previous" onclick="imaginePlayerAction('previous')">⏮</button>
+   <button class="main-play" aria-label="${state&&!state.paused?'Pause':'Play'}" title="${state&&!state.paused?'Pause':'Play'}" onclick="imaginePlayerAction('toggle')">${state&&!state.paused?'Ⅱ':'▶'}</button>
+   <button aria-label="Stop" title="Stop and rewind" onclick="imaginePlayerAction('stop')">■</button>
+   <button aria-label="Next" title="Next" onclick="imaginePlayerAction('next')">⏭</button>
+  </div>
+  <div class="imagine-player-progress"><span>${imagineFormatTime(position)}</span><input aria-label="Song position" type="range" min="0" max="${duration||1}" value="${position}" onchange="imagineSeek(this.value)" ${duration?'':'disabled'}><span>${imagineFormatTime(duration)}</span></div>
+  <div class="imagine-player-status">${esc(imaginePlayerError||(!imaginePlayerReady?'Spotify Premium playback · select a song':'Imagine Spotify player'))}</div>
+ </div>`;
+}
+const imagineOldSongEditor=songEditor;
+songEditor=function(p){
+ const song=p.songs.find(s=>s.id===activeSong);
+ const html=imagineOldSongEditor(p);
+ return song&&imagineSongId(song)?`<div style="margin-bottom:14px"><button class="btn primary" onclick="imaginePlaySong('${song.id}')">▶ Play in Imagine</button></div>`+html:html;
+};
+const imagineOldSongsPage=songsPage;
+songsPage=function(p){return imagineOldSongsPage(p)}
+const imagineOldRender=render;
+render=function(...args){let result=imagineOldRender(...args);imagineUpdatePlayer();return result};
+const imagineOldDisconnect=spotifyDisconnect;
+spotifyDisconnect=function(){if(imaginePlayer){imaginePlayer.disconnect();imaginePlayer=null}imagineDevice=null;imaginePlayerReady=false;imaginePlayerState=null;imaginePlayingSong=null;imagineOldDisconnect();imagineUpdatePlayer()};
+setInterval(()=>{if(imaginePlayerReady&&imaginePlayerState&&!imaginePlayerState.paused){imaginePlayer.getCurrentState().then(s=>{if(s){imaginePlayerState=s;imagineUpdatePlayer()}})}},2000);
+
 spotifyHandleRedirect();
 
 try { render(); } catch (error) {
