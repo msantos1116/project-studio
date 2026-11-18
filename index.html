@@ -33,7 +33,7 @@
 #imagineVersionCorner{position:fixed;left:12px;bottom:12px;z-index:350;background:#17213b;color:#dceaff;border:1px solid #607294;border-radius:9px;padding:7px 11px;font-size:12px;font-weight:750;letter-spacing:.2px;box-shadow:0 3px 14px #0006;pointer-events:none}
 body.imagine-has-player #imagineVersionCorner{bottom:114px}
 @media(max-width:750px){body.imagine-has-player #imagineVersionCorner{bottom:154px}#imagineVersionCorner{left:8px;bottom:8px;padding:5px 8px;font-size:11px}}
-</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script></head><body><div class="shell"><aside class="side"><div class="brand">✦ <span>Imagine</span></div><div class="eyebrow" style="padding-left:12px">Workspace</div><div id="accountTop" class="account-top"></div><nav class="nav" id="nav"></nav><div class="sidefoot"><div class="app-version">Imagine · V7.8.8</div><span id="saveStatus">Saved on this device</span></div></aside><main class="main" id="app"></main></div><div id="toast" class="toast"></div><div id="imagineVersionCorner" aria-label="Imagine application version">Imagine · V7.8.8</div><div id="modalRoot"></div><input id="imagineUniversalUpload" type="file" multiple hidden onchange="mediaUpload(this.files)"><input id="importFile" type="file" accept="application/json" hidden><script>
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script></head><body><div class="shell"><aside class="side"><div class="brand">✦ <span>Imagine</span></div><div class="eyebrow" style="padding-left:12px">Workspace</div><div id="accountTop" class="account-top"></div><nav class="nav" id="nav"></nav><div class="sidefoot"><div class="app-version">Imagine · V7.8.10</div><span id="saveStatus">Saved on this device</span></div></aside><main class="main" id="app"></main></div><div id="toast" class="toast"></div><div id="imagineVersionCorner" aria-label="Imagine application version">Imagine · V7.8.10</div><div id="modalRoot"></div><input id="imagineUniversalUpload" type="file" multiple hidden onchange="mediaUpload(this.files)"><input id="importFile" type="file" accept="application/json" hidden><script>
 'use strict';const KEY='project-studio-v2';const uid=()=>crypto.randomUUID?.()||String(Date.now())+Math.random().toString(36).slice(2);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const initial=()=>({version:2,projects:[]});let data=initial(); // Account-scoped data is loaded only after authentication
 let current=null,view='home',activeScene=null,activeSong=null,activeNote=null,activeCharacter=null,sceneTab='story',ideaFilter='All',ideaQuery='';const $=id=>document.getElementById(id);function save(){if(!cloudUser){cloudStatus('Sign in to save your work');return}try{const serialized=JSON.stringify(data);const key=accountDataKey();if(localStorage.getItem(key)===serialized)return;localStorage.setItem(key,serialized);$('saveStatus').textContent='✓ Saved on this device';cloudQueue()}catch(e){$('saveStatus').textContent='Storage full — export backup';toast('Could not save. Export your project now.')}}function toast(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(window._toast);window._toast=setTimeout(()=>$('toast').style.display='none',2500)}function project(){return data.projects.find(p=>p.id===current)}function persist(){flushEditor();save();render()}function b(label,fn,cls=''){return `<button class="btn ${cls}" onclick="${fn}">${label}</button>`}function blank(label,desc){return `<div class="empty"><strong>${esc(label)}</strong><p>${esc(desc)}</p></div>`}function field(id,label,value='',type='text'){return `<div class="field"><label for="${id}">${esc(label)}</label>${type==='textarea'?`<textarea id="${id}">${esc(value)}</textarea>`:`<input id="${id}" type="${type}" value="${esc(value)}">`}</div>`}function select(id,label,options,value){return `<div class="field"><label>${esc(label)}</label><select id="${id}">${options.map(o=>`<option value="${esc(o)}" ${o===value?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`}function modal(html){$('modalRoot').innerHTML=`<div class="modalbg" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`}function closeModal(){$('modalRoot').innerHTML=''}function setView(v){flushEditor();view=v;activeScene=null;activeSong=null;activeNote=null;activeCharacter=null;render()}function goHome(){flushEditor();current=null;setView('home')}function openProject(id){flushEditor();current=id;setView('overview')}let autosaveTimer;function queueAutosave(){clearTimeout(autosaveTimer);$('saveStatus').textContent='Saving…';autosaveTimer=setTimeout(flushEditor,450)}
 function flushEditor(){clearTimeout(autosaveTimer);if(!current)return;let p=project();if(!p)return;const val=id=>$(id)?.value;
@@ -191,7 +191,7 @@ function cloudStatus(msg){cloudMessage=msg;let el=$('cloudState');if(el)el.textC
 function accountSettingsPage(){return `<div class="top"><div><div class="eyebrow">Workspace preferences</div><h1 class="title">Settings</h1><p class="sub">Account preferences and automatic synchronization.</p></div></div>
  <div class="panel"><h2>Account</h2><p class="note">${cloudUser?'Signed in as <strong>'+esc(cloudUser.email||'')+'</strong>':'You are not signed in. Sign in to access your projects across devices.'}</p><div class="actions">${cloudUser?b('Log out','cloudLogout()','ghost'):b('Log in / Create account','showLoginDialog()','primary')}</div></div>
  <div class="panel"><h2>Automatic cloud synchronization</h2><p id="cloudState" class="note">${esc(cloudMessage)}</p><p class="note">Cloud-first autosave. If connection is interrupted, your edits are temporarily saved on this device and will be retried. Export a JSON backup if you need an independent copy.</p></div>
- ${cloudConflictPanel()}<div class="panel"><h2>About Project Studio</h2><p class="note">Version 7.8.8</p></div>
+ ${cloudConflictPanel()}<div class="panel"><h2>About Project Studio</h2><p class="note">Version 7.8.10</p></div>
  <div class="panel"><h2>Backups</h2><p class="note">Keep an independent copy of your projects for safekeeping.</p><div class="actions">${b('Export backup','exportData()','ghost')}${legacyBackupAvailable()?b('Export previous local backup','exportLegacyBackup()','ghost'):''}</div></div>`}
 function showLoginDialog(){
  if(cloudUser){setView('accountSettings');return}
@@ -449,7 +449,7 @@ async function imagineCheckVersion(){
  if(location.protocol!=='https:'||!location.hostname.endsWith('github.io'))return;
  try{const response=await fetch(location.pathname+'?imagine_version_check='+Date.now(),{cache:'no-store'});
   if(!response.ok)return;const html=await response.text();const found=html.match(/Imagine · V(\d+\.\d+\.\d+)/);
-  if(found&&found[1]!=='7.8.8'){
+  if(found&&found[1]!=='7.8.10'){
    const warning='A different Imagine version is deployed ('+found[1]+'). Export your work before refreshing.';
    cloudStatus(warning);
   }
@@ -569,7 +569,7 @@ render=function(){imagineBaseRender();if(!cloudUser||!project()||view==='account
 
 
 // V7.8 — visual-first ideas, gallery, and Spotify OAuth PKCE.
-const IMAGINE_VERSION='V7.8.8';
+const IMAGINE_VERSION='V7.8.10';
 const mediaUrlCache=new Map();
 async function hydrateMediaImages(root=document){
  const nodes=[...root.querySelectorAll('img[data-asset-id]')];
@@ -627,6 +627,9 @@ render=function(){originalRenderV77();if(view==='ideas'&&project()){document.que
 // Spotify Premium required; playback is not available to every Spotify account.
 let imaginePlayer=null,imagineDevice=null,imaginePlayerState=null,imaginePlayerError='',imaginePlayingSong=null;
 let imaginePlayerReady=false,imagineSdkPromise=null,imaginePositionTimer=null;
+let imagineQueueOpen=false,imagineActiveProjectId=null;
+let imagineRepeatMode='off',imagineShuffle=false,imagineShuffleHistory=[],imagineTrackEnding=false,imagineEndHandledFor=null;
+let imagineLastPosition=0,imagineLastDuration=0,imagineLastPaused=true;
 const imaginePlayerCss=document.createElement('style');
 imaginePlayerCss.textContent=`
 body.imagine-has-player{padding-bottom:105px}
@@ -639,9 +642,16 @@ body.imagine-has-player{padding-bottom:105px}
 .imagine-player-controls{display:flex;align-items:center;justify-content:center;gap:8px}
 .imagine-player-controls button{border:0;background:transparent;color:#fff;font-size:19px;cursor:pointer;padding:7px;border-radius:9px}
 .imagine-player-controls button:hover{background:#29344d}
+.imagine-player-controls .mode-active{color:#1ed760!important;background:#263e37!important}
 .imagine-player-controls .main-play{background:#1ed760;color:#08150c;border-radius:50%;width:39px;height:39px;font-size:20px}
 .imagine-player-progress{display:flex;align-items:center;gap:8px;flex:1;max-width:350px;font-size:11px;color:#abb5d1}
 .imagine-player-progress input{width:100%;accent-color:#1ed760}
+#imagineProjectSongs{position:absolute;bottom:100%;right:14px;width:min(420px,calc(100vw - 28px));max-height:330px;overflow:auto;background:#172038;border:1px solid #46516c;border-radius:12px 12px 0 0;padding:12px;box-shadow:0 -12px 35px #0008}
+.imagine-song-choice{display:flex;align-items:center;gap:10px;width:100%;padding:10px;text-align:left;border:0;border-radius:8px;background:transparent;color:#f5f6ff;cursor:pointer}
+.imagine-song-choice:hover,.imagine-song-choice.active{background:#303a56}
+.imagine-song-choice:disabled{opacity:.5;cursor:not-allowed}
+.imagine-song-choice small{display:block;color:#aeb8d0;margin-top:3px}
+.imagine-song-list-toggle{border:1px solid #47516a;background:#252f47;color:#fff;border-radius:8px;padding:8px 11px;cursor:pointer;white-space:nowrap}
 .imagine-player-status{font-size:11px;color:#b5c0d8;max-width:200px}
 .imagine-play-btn{margin-left:8px;cursor:pointer}
 @media(max-width:750px){#imagineMiniPlayer{padding:9px}.imagine-player-inner{flex-wrap:wrap;gap:6px}.imagine-player-info{flex:1 1 55%}.imagine-player-progress{order:3;flex:1 1 100%;max-width:none}.imagine-player-status{display:none}body.imagine-has-player{padding-bottom:145px}}
@@ -668,7 +678,7 @@ async function imagineEnsurePlayer(){
   imaginePlayer=new Spotify.Player({name:'Imagine Music Player',getOAuthToken:cb=>cb(spotifyToken?.access_token||''),volume:.65});
   imaginePlayer.addListener('ready',({device_id})=>{imagineDevice=device_id;imaginePlayerReady=true;imaginePlayerError='';imagineUpdatePlayer()});
   imaginePlayer.addListener('not_ready',()=>{imaginePlayerReady=false;imagineDevice=null;imagineUpdatePlayer()});
-  imaginePlayer.addListener('player_state_changed',state=>{imaginePlayerState=state;imagineUpdatePlayer()});
+  imaginePlayer.addListener('player_state_changed',state=>{imagineObservePlayback(state);imaginePlayerState=state;imagineUpdatePlayer()});
   for(const name of ['initialization_error','authentication_error','account_error','playback_error']){
    imaginePlayer.addListener(name,({message})=>{imaginePlayerError=message||name;imagineUpdatePlayer();toast('Spotify player: '+imaginePlayerError)});
   }
@@ -687,13 +697,57 @@ async function imaginePlayerApi(path,method='PUT',body){
  });
  if(!r.ok){let d='';try{let x=await r.json();d=x?.error?.message||''}catch{}throw Error('Spotify playback '+r.status+(d?': '+d:''))}
 }
+function imagineProjectTracks(){return (project()?.songs||[]).filter(song=>imagineSongId(song))}
+function imagineToggleProjectSongs(){imagineQueueOpen=!imagineQueueOpen;imagineUpdatePlayer()}
+function imagineSelectProjectSong(id){imagineQueueOpen=false;imaginePlaySong(id)}
+function imagineToggleShuffle(){imagineShuffle=!imagineShuffle;imagineShuffleHistory=[];imagineUpdatePlayer()}
+function imagineCycleRepeat(){imagineRepeatMode=imagineRepeatMode==='off'?'all':imagineRepeatMode==='all'?'one':'off';imagineUpdatePlayer()}
+async function imagineProjectStep(direction,fromEnd=false){
+ const songs=imagineProjectTracks();
+ if(!songs.length){if(!fromEnd)toast('Add a Spotify-linked song to this project first');return}
+ const i=songs.findIndex(s=>s.id===imaginePlayingSong?.id);
+ let next;
+ if(direction<0&&imagineShuffle&&imagineShuffleHistory.length){
+  const prior=imagineShuffleHistory.pop();next=songs.findIndex(s=>s.id===prior);if(next<0)next=i>=0?i:0;
+ }else if(imagineShuffle&&direction>0&&songs.length>1){
+  const choices=songs.map((_,index)=>index).filter(index=>index!==i);
+  next=choices[Math.floor(Math.random()*choices.length)];
+  if(i>=0)imagineShuffleHistory.push(songs[i].id);
+ }else{
+  if(i<0)next=direction<0?songs.length-1:0;
+  else if(fromEnd&&direction>0&&i===songs.length-1&&imagineRepeatMode==='off'){
+   imagineLastPaused=true;imaginePlayerState=null;imagineUpdatePlayer();return;
+  }else next=(i+direction+songs.length)%songs.length;
+ }
+ await imaginePlaySong(songs[next].id);
+}
+function imagineObservePlayback(state){
+ if(!imaginePlayingSong||imagineTrackEnding)return;
+ const duration=state?.duration||imagineLastDuration||0;
+ const position=state?.position??imagineLastPosition;
+ const paused=state?.paused??true;
+ const ended=duration>5000&&imagineLastDuration>5000&&!imagineLastPaused&&
+  imagineLastPosition>=imagineLastDuration-2200&&
+  (state===null||paused&&position<2000||position>=duration-300&&paused);
+ if(state){imagineLastPosition=state.position||0;imagineLastDuration=state.duration||0;imagineLastPaused=state.paused}
+ if(!ended)return;
+ const key=imagineActiveProjectId+':'+imaginePlayingSong.id;
+ if(imagineEndHandledFor===key)return;
+ imagineEndHandledFor=key;imagineTrackEnding=true;
+ Promise.resolve().then(async()=>{
+  try{
+   if(imagineRepeatMode==='one')await imaginePlaySong(imaginePlayingSong.id);
+   else await imagineProjectStep(1,true);
+  }finally{imagineTrackEnding=false}
+ }).catch(e=>{imaginePlayerError=e.message;imagineUpdatePlayer()});
+}
 async function imaginePlaySong(id){
  try{
   const p=project(),song=p?.songs?.find(s=>s.id===id);
   if(!song)throw Error('Song not found');
   const track=imagineSongId(song);
   if(!track)throw Error('This song needs a Spotify track link to play');
-  imaginePlayingSong=song;imagineUpdatePlayer();
+  imaginePlayingSong=song;imagineActiveProjectId=current;imaginePlayerState=null;imagineEndHandledFor=null;imagineLastPosition=0;imagineLastDuration=0;imagineLastPaused=true;imagineUpdatePlayer();
   // A user gesture activates audio on mobile Safari and other restricted browsers.
   if(imaginePlayer)imaginePlayer.activateElement();
   const device=await imagineEnsurePlayer();
@@ -704,14 +758,16 @@ async function imaginePlaySong(id){
 }
 async function imaginePlayerAction(action){
  try{
+  if(action==='next')return imagineProjectStep(1);
+  if(action==='previous')return imagineProjectStep(-1);
   if(!imaginePlayerReady)await imagineEnsurePlayer();
   await imaginePlayer.activateElement();
   if(action==='toggle'){
    if(!imaginePlayerState&&imaginePlayingSong)return imaginePlaySong(imaginePlayingSong.id);
    await imaginePlayer.togglePlay();
-  }else if(action==='stop'){await imaginePlayer.pause();await imaginePlayer.seek(0)}
-  else if(action==='next')await imaginePlayer.nextTrack();
-  else if(action==='previous')await imaginePlayer.previousTrack();
+  }else if(action==='stop'){await imaginePlayer.pause();await imaginePlayer.seek(0);imagineLastPaused=true}
+  else if(action==='next')return imagineProjectStep(1);
+  else if(action==='previous')return imagineProjectStep(-1);
   imaginePlayerError='';imagineUpdatePlayer();
  }catch(e){imaginePlayerError=e.message;imagineUpdatePlayer();toast(e.message)}
 }
@@ -723,22 +779,31 @@ function imagineUpdatePlayer(){
  if(!spotifyConnected()){el?.remove();document.body.classList.remove('imagine-has-player');return}
  if(!el){el=document.createElement('div');el.id='imagineMiniPlayer';document.body.appendChild(el)}
  document.body.classList.add('imagine-has-player');
+ if(imagineActiveProjectId!==current){
+  imaginePlayingSong=null;imaginePlayerState=null;imagineQueueOpen=false;imagineActiveProjectId=current;imagineShuffleHistory=[];imagineEndHandledFor=null;imagineLastPaused=true;
+  // Never continue playing the previous project's song after switching projects.
+  if(imaginePlayer)imaginePlayer.pause().catch(()=>{});
+ }
  const state=imaginePlayerState,track=state?.track_window?.current_track;
  const song=imaginePlayingSong;
- const title=track?.name||song?.title||'Ready to play';
- const artist=track?.artists?.map(x=>x.name).join(', ')||song?.artist||'Select a song in Imagine';
- const cover=track?.album?.images?.[0]?.url||song?.artwork||'';
+ const songs=imagineProjectTracks();
+ const title=(song?(track?.name||song.title):'Ready to play');
+ const artist=song?(track?.artists?.map(x=>x.name).join(', ')||song.artist||''):'Choose a song from this project';
+ const cover=song?(track?.album?.images?.[0]?.url||song.artwork||''):'';
  const duration=state?.duration||track?.duration_ms||0,position=state?.position||0;
- el.innerHTML=`<div class="imagine-player-inner">
+ el.innerHTML=`${imagineQueueOpen?`<div id="imagineProjectSongs" role="region" aria-label="Current project songs"><strong>${esc(project()?.title||project()?.name||'Project')} · Songs</strong>${!current?'<p>Open a project to see its songs.</p>':songs.length?songs.map(item=>`<button class="imagine-song-choice ${item.id===song?.id?'active':''}" onclick="imagineSelectProjectSong('${item.id}')"><span>♫</span><span><strong>${esc(item.title||'Untitled song')}</strong><small>${esc(item.artist||'Unknown artist')}</small></span></button>`).join(''):'<p>No Spotify-linked songs in this project yet. Add songs in Music.</p>'}</div>`:''}<div class="imagine-player-inner">
   <div class="imagine-player-info">${cover?`<img class="imagine-player-cover" src="${esc(cover)}" alt="Album art">`:'<div class="imagine-player-cover"></div>'}
   <div style="min-width:0"><div class="imagine-player-title">${esc(title)}</div><div class="imagine-player-artist">${esc(artist)}</div></div></div>
   <div class="imagine-player-controls">
+   <button class="${imagineShuffle?'mode-active':''}" aria-pressed="${imagineShuffle}" aria-label="Shuffle ${imagineShuffle?'on':'off'}" title="Shuffle ${imagineShuffle?'on':'off'}" onclick="imagineToggleShuffle()">⤨</button>
    <button aria-label="Previous" title="Previous" onclick="imaginePlayerAction('previous')">⏮</button>
    <button class="main-play" aria-label="${state&&!state.paused?'Pause':'Play'}" title="${state&&!state.paused?'Pause':'Play'}" onclick="imaginePlayerAction('toggle')">${state&&!state.paused?'Ⅱ':'▶'}</button>
    <button aria-label="Stop" title="Stop and rewind" onclick="imaginePlayerAction('stop')">■</button>
    <button aria-label="Next" title="Next" onclick="imaginePlayerAction('next')">⏭</button>
+   <button class="${imagineRepeatMode!=='off'?'mode-active':''}" aria-label="Repeat ${imagineRepeatMode}" title="Repeat: ${imagineRepeatMode} (click to change)" onclick="imagineCycleRepeat()">${imagineRepeatMode==='one'?'↻₁':'↻'}</button>
   </div>
   <div class="imagine-player-progress"><span>${imagineFormatTime(position)}</span><input aria-label="Song position" type="range" min="0" max="${duration||1}" value="${position}" onchange="imagineSeek(this.value)" ${duration?'':'disabled'}><span>${imagineFormatTime(duration)}</span></div>
+  <button class="imagine-song-list-toggle" onclick="imagineToggleProjectSongs()" aria-expanded="${imagineQueueOpen}" title="Choose a song from this project">☷ Songs (${songs.length})</button>
   <div class="imagine-player-status">${esc(imaginePlayerError||(!imaginePlayerReady?'Spotify Premium playback · select a song':'Imagine Spotify player'))}</div>
  </div>`;
 }
@@ -753,8 +818,8 @@ songsPage=function(p){return imagineOldSongsPage(p)}
 const imagineOldRender=render;
 render=function(...args){let result=imagineOldRender(...args);imagineUpdatePlayer();return result};
 const imagineOldDisconnect=spotifyDisconnect;
-spotifyDisconnect=function(){if(imaginePlayer){imaginePlayer.disconnect();imaginePlayer=null}imagineDevice=null;imaginePlayerReady=false;imaginePlayerState=null;imaginePlayingSong=null;imagineOldDisconnect();imagineUpdatePlayer()};
-setInterval(()=>{if(imaginePlayerReady&&imaginePlayerState&&!imaginePlayerState.paused){imaginePlayer.getCurrentState().then(s=>{if(s){imaginePlayerState=s;imagineUpdatePlayer()}})}},2000);
+spotifyDisconnect=function(){if(imaginePlayer){imaginePlayer.disconnect();imaginePlayer=null}imagineDevice=null;imaginePlayerReady=false;imaginePlayerState=null;imaginePlayingSong=null;imagineQueueOpen=false;imagineShuffleHistory=[];imagineOldDisconnect();imagineUpdatePlayer()};
+setInterval(()=>{if(imaginePlayerReady&&imaginePlayerState&&!imaginePlayerState.paused){imaginePlayer.getCurrentState().then(s=>{imagineObservePlayback(s);if(s){imaginePlayerState=s;imagineUpdatePlayer()}})}},2000);
 
 spotifyHandleRedirect();
 
